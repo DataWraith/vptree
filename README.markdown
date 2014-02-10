@@ -1,12 +1,16 @@
-# vp-tree
+# vptree
 
-vp-tree is an implementation of [Vantage-point
-trees](https://en.wikipedia.org/wiki/Vantage-point_tree) in Go, based on Steve
-Hanov's C++ [implementation](http://stevehanov.ca/blog/index.php/?id=130).
+vptree is a port of Steve Hanov's C++
+[implementation](http://stevehanov.ca/blog/index.php/?id=130) of [Vantage-point
+trees](https://en.wikipedia.org/wiki/Vantage-point_tree) to the Go programming
+language. Vantage-point trees are useful for nearest-neighbour searches in
+high-dimensional metric spaces.
+
 
 ## Installation
 
-	go get github.com/DataWraith/vp-tree
+	go get github.com/DataWraith/vptree
+
 
 ## Usage
 
