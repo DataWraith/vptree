@@ -32,7 +32,9 @@ func New(metric Metric, items []interface{}) (t *VPTree) {
 		items:          items,
 		distanceMetric: metric,
 	}
-	t.root = t.buildFromPoints(0, len(items))
+	if len(items) > 0 {
+		t.root = t.buildFromPoints(0, len(items)-1)
+	}
 	return
 }
 
