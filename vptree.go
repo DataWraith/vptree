@@ -32,9 +32,7 @@ func New(metric Metric, items []interface{}) (t *VPTree) {
 		items:          items,
 		distanceMetric: metric,
 	}
-	if len(items) > 0 {
-		t.root = t.buildFromPoints(0, len(items)-1)
-	}
+	t.root = t.buildFromPoints(0, len(items))
 	return
 }
 
@@ -77,7 +75,7 @@ func (vp *VPTree) buildFromPoints(lower int, upper int) (n *node) {
 		// Partition around the median distance
 		pivotDistance := vp.distanceMetric(vp.items[median], vp.items[lower])
 		left := lower + 1
-		right := upper
+		right := upper - 1
 		for left < right {
 			for vp.distanceMetric(vp.items[left], vp.items[lower]) < pivotDistance {
 				left += 1
