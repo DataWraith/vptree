@@ -22,10 +22,10 @@ type heapItem struct {
 // interface{}-values. The function *must* be a metric in the mathematical
 // sense, that is, the metric d must fullfill the following requirements:
 //
-// * d(x, y) >= 0
-// * d(x, y) = 0 if and only if x = y
-// * d(x, y) = d(y, x)
-// * d(x, z) <= d(x, y) + d(y, z) (triangle inequality)
+//	* d(x, y) >= 0
+//	* d(x, y) = 0 if and only if x = y
+//	* d(x, y) = d(y, x)
+//	* d(x, z) <= d(x, y) + d(y, z) (triangle inequality)
 type Metric func(a, b interface{}) float64
 
 // A VPTree struct represents a Vantage-point tree. Vantage-point trees are
