@@ -80,7 +80,7 @@ func (vp *VPTree) buildFromPoints(items []interface{}) (n *node) {
 		for i := 0; i < len(items)-1; i++ {
 			if vp.distanceMetric(items[i], n.Item) <= pivotDist {
 				items[storeIndex], items[i] = items[i], items[storeIndex]
-				storeIndex += 1
+				storeIndex++
 			}
 		}
 		items[len(items)-1], items[storeIndex] = items[storeIndex], items[len(items)-1]
