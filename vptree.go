@@ -74,23 +74,17 @@ func (vp *VPTree) buildFromPoints(items []interface{}) (n *node) {
 		// away.
 		median := len(items) / 2
 		pivotDist := vp.distanceMetric(items[median], n.Item)
+		items[median], items[len(items)-1] = items[len(items)-1], items[median]
 
-		left := 0
-		right := len(items) - 1
-
-		for left < right {
-			for vp.distanceMetric(items[left], n.Item) < pivotDist {
-				left += 1
-			}
-			for vp.distanceMetric(items[right], n.Item) > pivotDist {
-				right -= 1
-			}
-			if left <= right {
-				items[left], items[right] = items[right], items[left]
-				left += 1
-				right -= 1
+		storeIndex := 0
+		for i := 0; i < len(items)-1; i++ {
+			if vp.distanceMetric(items[i], n.Item) <= pivotDist {
+				items[storeIndex], items[i] = items[i], items[storeIndex]
+				storeIndex += 1
 			}
 		}
+		items[len(items)-1], items[storeIndex] = items[storeIndex], items[len(items)-1]
+		median = storeIndex
 
 		n.Threshold = vp.distanceMetric(items[median], n.Item)
 		n.Left = vp.buildFromPoints(items[:median])
