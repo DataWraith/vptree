@@ -58,15 +58,13 @@ func linearSearch(target Coordinate, items []Coordinate, k int) (coords []Coordi
 
 func TestSmall(t *testing.T) {
 	items := []Coordinate{
-		Coordinate{0, 0},
-		Coordinate{0, 2},
-		Coordinate{1, 2},
-		Coordinate{4, 2},
-		Coordinate{2, 2},
-		Coordinate{3, 2},
+		Coordinate{24, 57},
+		Coordinate{35, 28},
+		Coordinate{55, 48},
+		Coordinate{68, 42},
 	}
 
-	target := Coordinate{1, 0}
+	target := Coordinate{12, 34}
 
 	vpitems := make([]interface{}, len(items))
 	for i, v := range items {
@@ -74,8 +72,8 @@ func TestSmall(t *testing.T) {
 	}
 
 	vp := New(CoordinateMetric, vpitems)
-	coords1, distances1 := vp.Search(target, 1)
-	coords2, distances2 := linearSearch(target, items, 1)
+	coords1, distances1 := vp.Search(target, 3)
+	coords2, distances2 := linearSearch(target, items, 3)
 
 	if len(coords1) != len(coords2) {
 		t.Fatalf("Expected %v coordinates, got %v", len(coords2), len(coords1))
