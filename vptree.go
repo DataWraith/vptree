@@ -41,7 +41,7 @@ func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, dist
 	vp.search(vp.root, target, k, &h)
 
 	for h.Len() > 0 {
-		hi := h.Pop()
+		hi := heap.Pop(&h)
 		results = append(results, hi.(*heapItem).Item)
 		distances = append(distances, hi.(*heapItem).Dist)
 	}
