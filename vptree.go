@@ -7,15 +7,15 @@ import (
 )
 
 type node struct {
-	Index     int
+	Item      interface{}
 	Threshold float64
 	Left      *node
 	Right     *node
 }
 
 type heapItem struct {
-	Index int
-	Dist  float64
+	Item interface{}
+	Dist float64
 }
 
 type Metric func(a, b interface{}) float64
@@ -23,16 +23,14 @@ type Metric func(a, b interface{}) float64
 type VPTree struct {
 	root           *node
 	tau            float64
-	items          []interface{}
 	distanceMetric Metric
 }
 
 func New(metric Metric, items []interface{}) (t *VPTree) {
 	t = &VPTree{
-		items:          items,
 		distanceMetric: metric,
 	}
-	t.root = t.buildFromPoints(0, len(items))
+	t.root = t.buildFromPoints(items)
 	return
 }
 
@@ -44,7 +42,7 @@ func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, dist
 
 	for h.Len() > 0 {
 		hi := h.Pop()
-		results = append(results, vp.items[hi.(*heapItem).Index])
+		results = append(results, hi.(*heapItem).Item)
 		distances = append(distances, hi.(*heapItem).Dist)
 	}
 
@@ -58,46 +56,46 @@ func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, dist
 	return
 }
 
-func (vp *VPTree) buildFromPoints(lower int, upper int) (n *node) {
-	if upper == lower {
+func (vp *VPTree) buildFromPoints(items []interface{}) (n *node) {
+	if len(items) == 0 {
 		return nil
 	}
 
-	n = &node{Index: lower}
+	n = &node{}
 
-	if upper-lower > 1 {
-		// Choose an arbitrary point and move it to the start
-		i := rand.Intn(upper-lower-1) + lower
-		vp.items[lower], vp.items[i] = vp.items[i], vp.items[lower]
+	// Take a random item out of the items slice and make it this node's item
+	idx := rand.Intn(len(items))
+	n.Item = items[idx]
+	items[idx], items = items[len(items)-1], items[:len(items)-1]
 
-		median := (upper + lower) / 2
+	if len(items) > 0 {
+		// Now partition the items into two equal-sized sets, one
+		// closer to the node's item than the median, and one farther
+		// away.
+		median := len(items) / 2
+		pivotDist := vp.distanceMetric(items[median], n.Item)
 
-		// Partition around the median distance
-		pivotDistance := vp.distanceMetric(vp.items[median], vp.items[lower])
-		left := lower + 1
-		right := upper - 1
+		left := 0
+		right := len(items) - 1
+
 		for left < right {
-			for vp.distanceMetric(vp.items[left], vp.items[lower]) < pivotDistance {
+			for vp.distanceMetric(items[left], n.Item) < pivotDist {
 				left += 1
 			}
-			for vp.distanceMetric(vp.items[right], vp.items[lower]) > pivotDistance {
+			for vp.distanceMetric(items[right], n.Item) > pivotDist {
 				right -= 1
 			}
 			if left <= right {
-				vp.items[left], vp.items[right] = vp.items[right], vp.items[left]
+				items[left], items[right] = items[right], items[left]
 				left += 1
 				right -= 1
 			}
 		}
 
-		// What was the median?
-		n.Threshold = vp.distanceMetric(vp.items[lower], vp.items[median])
-
-		n.Index = lower
-		n.Left = vp.buildFromPoints(lower+1, median)
-		n.Right = vp.buildFromPoints(median, upper)
+		n.Threshold = vp.distanceMetric(items[median], n.Item)
+		n.Left = vp.buildFromPoints(items[:median])
+		n.Right = vp.buildFromPoints(items[median:])
 	}
-
 	return
 }
 
@@ -106,13 +104,13 @@ func (vp *VPTree) search(n *node, target interface{}, k int, h *priorityQueue) {
 		return
 	}
 
-	dist := vp.distanceMetric(vp.items[n.Index], target)
+	dist := vp.distanceMetric(n.Item, target)
 
 	if dist < vp.tau {
 		if h.Len() == k {
 			heap.Pop(h)
 		}
-		heap.Push(h, &heapItem{n.Index, dist})
+		heap.Push(h, &heapItem{n.Item, dist})
 		if h.Len() == k {
 			vp.tau = h.Top().(*heapItem).Dist
 		}
