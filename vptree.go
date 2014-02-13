@@ -47,7 +47,9 @@ func New(metric Metric, items []interface{}) (t *VPTree) {
 	return
 }
 
-// Search searches the VP-tree for the k nearest neighbours of target
+// Search searches the VP-tree for the k nearest neighbours of target. It
+// returns the up to k narest neighbours and the corresponding distances in
+// order of least distance to largest distance.
 func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, distances []float64) {
 	h := make(priorityQueue, 0, k)
 
