@@ -18,14 +18,27 @@ type heapItem struct {
 	Dist float64
 }
 
+// A Metric is a function that measures the distance between two provided
+// interface{}-values. The function *must* be a metric in the mathematical
+// sense, that is, the metric d must fullfill the following requirements:
+//
+// * d(x, y) >= 0
+// * d(x, y) = 0 if and only if x = y
+// * d(x, y) = d(y, x)
+// * d(x, z) <= d(x, y) + d(y, z) (triangle inequality)
 type Metric func(a, b interface{}) float64
 
+// A VPTree struct represents a Vantage-point tree. Vantage-point trees are
+// useful for nearest-neighbour searches in high-dimensional metric spaces.
 type VPTree struct {
 	root           *node
 	tau            float64
 	distanceMetric Metric
 }
 
+// New creates a new VP-tree using the metric and items provided. The metric
+// measures the distance between two items, so that the VP-tree can find the
+// nearest neighbour(s) of a target item.
 func New(metric Metric, items []interface{}) (t *VPTree) {
 	t = &VPTree{
 		distanceMetric: metric,
@@ -34,6 +47,7 @@ func New(metric Metric, items []interface{}) (t *VPTree) {
 	return
 }
 
+// Search searches the VP-tree for the k nearest neighbours of target
 func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, distances []float64) {
 	h := make(priorityQueue, 0, k)
 
