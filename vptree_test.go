@@ -1,6 +1,7 @@
 package vptree
 
 import (
+	"container/heap"
 	"math"
 	"math/rand"
 	"testing"
@@ -34,25 +35,33 @@ func TestEmpty(t *testing.T) {
 	}
 }
 
-func linearSearch(target Coordinate, items []Coordinate, k int) (coords []Coordinate, distances []float64) {
-	for i := len(items) - 1; ; i-- {
-		hasChanged := false
-		for j := 0; j < i; j++ {
-			if CoordinateMetric(items[j], target) > CoordinateMetric(items[j+1], target) {
-				items[j], items[j+1] = items[j+1], items[j]
-				hasChanged = true
-			}
-		}
-		if hasChanged == false {
-			break
-		}
+func nearestNeighbours(target Coordinate, items []Coordinate, k int) (coords []Coordinate, distances []float64) {
+	pq := &priorityQueue{}
+
+	// Push all items onto a heap
+	for _, v := range items {
+		heap.Push(pq, &heapItem{v, CoordinateMetric(v, target)})
 	}
 
-	coords = items[:k]
-	distances = make([]float64, 0, k)
-	for i := 0; i < k; i++ {
-		distances = append(distances, CoordinateMetric(coords[i], target))
+	// Pop all but the k smallest items
+	for pq.Len() > k {
+		heap.Pop(pq)
 	}
+
+	// Extract the k smallest items and distances
+	for pq.Len() > 0 {
+		hi := heap.Pop(pq)
+		coords = append(coords, hi.(*heapItem).Item.(Coordinate))
+		distances = append(distances, hi.(*heapItem).Dist)
+	}
+
+	// Reverse results and distances, because we popped them from the heap
+	// in large-to-small order
+	for i, j := 0, len(coords)-1; i < j; i, j = i+1, j-1 {
+		coords[i], coords[j] = coords[j], coords[i]
+		distances[i], distances[j] = distances[j], distances[i]
+	}
+
 	return
 }
 
@@ -73,7 +82,7 @@ func TestSmall(t *testing.T) {
 
 	vp := New(CoordinateMetric, vpitems)
 	coords1, distances1 := vp.Search(target, 3)
-	coords2, distances2 := linearSearch(target, items, 3)
+	coords2, distances2 := nearestNeighbours(target, items, 3)
 
 	if len(coords1) != len(coords2) {
 		t.Fatalf("Expected %v coordinates, got %v", len(coords2), len(coords1))
@@ -117,7 +126,7 @@ func TestRandom(t *testing.T) {
 
 	// Get the k nearest neighbours and their distances
 	coords1, distances1 := vp.Search(q, k)
-	coords2, distances2 := linearSearch(q, items, k)
+	coords2, distances2 := nearestNeighbours(q, items, k)
 
 	if len(coords1) != len(coords2) {
 		t.Fatalf("Expected %v coordinates, got %v", len(coords2), len(coords1))
