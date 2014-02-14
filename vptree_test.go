@@ -19,22 +19,30 @@ func CoordinateMetric(a, b interface{}) float64 {
 	return math.Sqrt(math.Pow(c1.X-c2.X, 2) + math.Pow(c1.Y-c2.Y, 2))
 }
 
-// This test makes sure vptree's behavior is sane with no input items
-func TestEmpty(t *testing.T) {
-	vp := New(CoordinateMetric, nil)
-	qp := Coordinate{0, 0}
-
-	coords, distances := vp.Search(qp, 3)
-
-	if len(coords) != 0 {
-		t.Error("coords should have been of length 0")
+// This helper function compares two sets of coordinates/distances to make sure
+// they are the same.
+func compareCoordDistSets(t *testing.T, actualCoords []interface{}, expectedCoords []Coordinate, actualDists, expectedDists []float64) {
+	if len(actualCoords) != len(expectedCoords) {
+		t.Fatalf("Expected %v coordinates, got %v", len(expectedCoords), len(actualCoords))
 	}
 
-	if len(distances) != 0 {
-		t.Error("distances should have been of length 0")
+	if len(actualDists) != len(expectedDists) {
+		t.Fatalf("Expected %v distances, got %v", len(expectedDists), len(actualDists))
+	}
+
+	for i := 0; i < len(actualCoords); i++ {
+		if actualCoords[i] != expectedCoords[i] {
+			t.Errorf("Expected actualCoords[%v] to be %v, got %v", i, expectedCoords[i], actualCoords[i])
+		}
+		if actualDists[i] != expectedDists[i] {
+			t.Errorf("Expected actualDists[%v] to be %v, got %v", i, expectedDists[i], actualDists[i])
+		}
 	}
 }
 
+// This helper function finds the k nearest neighbours of target in items. It's
+// slower than the VPTree, but its correctness is easy to verify, so we can
+// test the VPTree against it.
 func nearestNeighbours(target Coordinate, items []Coordinate, k int) (coords []Coordinate, distances []float64) {
 	pq := &priorityQueue{}
 
@@ -65,6 +73,24 @@ func nearestNeighbours(target Coordinate, items []Coordinate, k int) (coords []C
 	return
 }
 
+// This test makes sure vptree's behavior is sane with no input items
+func TestEmpty(t *testing.T) {
+	vp := New(CoordinateMetric, nil)
+	qp := Coordinate{0, 0}
+
+	coords, distances := vp.Search(qp, 3)
+
+	if len(coords) != 0 {
+		t.Error("coords should have been of length 0")
+	}
+
+	if len(distances) != 0 {
+		t.Error("distances should have been of length 0")
+	}
+}
+
+// This test creates a small VPTree and makes sure its search function returns
+// the right results
 func TestSmall(t *testing.T) {
 	items := []Coordinate{
 		Coordinate{24, 57},
@@ -84,22 +110,7 @@ func TestSmall(t *testing.T) {
 	coords1, distances1 := vp.Search(target, 3)
 	coords2, distances2 := nearestNeighbours(target, items, 3)
 
-	if len(coords1) != len(coords2) {
-		t.Fatalf("Expected %v coordinates, got %v", len(coords2), len(coords1))
-	}
-
-	if len(distances1) != len(distances2) {
-		t.Fatalf("Expected %v distances, got %v", len(distances2), len(distances1))
-	}
-
-	for i := 0; i < len(coords1); i++ {
-		if coords1[i] != coords2[i] {
-			t.Errorf("Expected coords1[%v] to be %v, got %v", i, coords2[i], coords1[i])
-		}
-		if distances1[i] != distances2[i] {
-			t.Errorf("Expected distances1[%v] to be %v, got %v", i, distances2[i], distances1[i])
-		}
-	}
+	compareCoordDistSets(t, coords1, coords2, distances1, distances2)
 }
 
 // This test creates a bunch of random input items and tests against a linear search
@@ -128,20 +139,5 @@ func TestRandom(t *testing.T) {
 	coords1, distances1 := vp.Search(q, k)
 	coords2, distances2 := nearestNeighbours(q, items, k)
 
-	if len(coords1) != len(coords2) {
-		t.Fatalf("Expected %v coordinates, got %v", len(coords2), len(coords1))
-	}
-
-	if len(distances1) != len(distances2) {
-		t.Fatalf("Expected %v distances, got %v", len(distances2), len(distances1))
-	}
-
-	for i := 0; i < len(coords1); i++ {
-		if coords1[i] != coords2[i] {
-			t.Errorf("Expected coords1[%v] to be %v, got %v", i, coords2[i], coords1[i])
-		}
-		if distances1[i] != distances2[i] {
-			t.Errorf("Expected distances1[%v] to be %v, got %v", i, distances2[i], distances1[i])
-		}
-	}
+	compareCoordDistSets(t, coords1, coords2, distances1, distances2)
 }
