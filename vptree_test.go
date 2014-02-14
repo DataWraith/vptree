@@ -63,7 +63,7 @@ func nearestNeighbours(target Coordinate, items []Coordinate, k int) (coords []C
 		distances = append(distances, hi.(*heapItem).Dist)
 	}
 
-	// Reverse results and distances, because we popped them from the heap
+	// Reverse coords and distances, because we popped them from the heap
 	// in large-to-small order
 	for i, j := 0, len(coords)-1; i < j; i, j = i+1, j-1 {
 		coords[i], coords[j] = coords[j], coords[i]

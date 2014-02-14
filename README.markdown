@@ -48,7 +48,7 @@ operate correctly; a metric `d` must have the following properties:
 The next step is to build the tree:
 
 ```go
-func NearestNeighbor() {
+func NearestNeighbors() {
 	// Define some coordinates
 	coordinates := []Coordinate{
 		Coordinate{24, 57},
