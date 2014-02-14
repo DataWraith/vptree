@@ -51,6 +51,10 @@ func New(metric Metric, items []interface{}) (t *VPTree) {
 // returns the up to k narest neighbours and the corresponding distances in
 // order of least distance to largest distance.
 func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, distances []float64) {
+	if k < 1 {
+		return
+	}
+
 	h := make(priorityQueue, 0, k)
 
 	vp.tau = math.MaxFloat64
