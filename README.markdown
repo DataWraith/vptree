@@ -17,6 +17,7 @@ high-dimensional metric spaces.
 First, you need to define the metric space you want to search in:
 
 ```go
+import "fmt"
 import "github.com/DataWraith/vptree"
 
 type Coordinate struct {
