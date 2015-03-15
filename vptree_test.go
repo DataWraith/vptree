@@ -114,7 +114,8 @@ func TestSmall(t *testing.T) {
 	compareCoordDistSets(t, coords1, coords2, distances1, distances2)
 }
 
-// This test creates a bunch of random input items and tests against a linear search
+// This test creates a bunch of random input items and tests against the
+// simpler, but slower nearestNeighbours function
 func TestRandom(t *testing.T) {
 	items := make([]Coordinate, 0, 10)
 
