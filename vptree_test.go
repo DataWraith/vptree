@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"math"
 	"math/rand"
+	"sync"
 	"testing"
 )
 
@@ -140,4 +141,45 @@ func TestRandom(t *testing.T) {
 	coords2, distances2 := nearestNeighbours(q, items, k)
 
 	compareCoordDistSets(t, coords1, coords2, distances1, distances2)
+}
+
+// This test creates a random tree and tests concurrent queries
+func TestConcurrent(t *testing.T) {
+	var items []Coordinate
+
+	// Generate 1000 random coordinates
+	for i := 0; i < 1000; i++ {
+		items = append(items, Coordinate{X: rand.Float64(), Y: rand.Float64()})
+	}
+
+	// Build a VPTree
+	vpitems := make([]interface{}, len(items))
+	for i, v := range items {
+		vpitems[i] = interface{}(v)
+	}
+	vp := New(CoordinateMetric, vpitems)
+
+	var wg sync.WaitGroup
+
+	for i := 0; i < 8; i++ {
+
+		wg.Add(1)
+
+		go func() {
+			for j := 0; j < 100; j++ {
+				// Random query point
+				q := Coordinate{X: rand.Float64(), Y: rand.Float64()}
+
+				// Get the k nearest neighbours and their distances
+				coords1, distances1 := vp.Search(q, 10)
+				coords2, distances2 := nearestNeighbours(q, items, 10)
+
+				compareCoordDistSets(t, coords1, coords2, distances1, distances2)
+			}
+			wg.Done()
+		}()
+
+	}
+
+	wg.Wait()
 }

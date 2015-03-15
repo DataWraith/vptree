@@ -32,7 +32,6 @@ type Metric func(a, b interface{}) float64
 // useful for nearest-neighbour searches in high-dimensional metric spaces.
 type VPTree struct {
 	root           *node
-	tau            float64
 	distanceMetric Metric
 }
 
@@ -57,8 +56,8 @@ func (vp *VPTree) Search(target interface{}, k int) (results []interface{}, dist
 
 	h := make(priorityQueue, 0, k)
 
-	vp.tau = math.MaxFloat64
-	vp.search(vp.root, target, k, &h)
+	tau := math.MaxFloat64
+	vp.search(vp.root, &tau, target, k, &h)
 
 	for h.Len() > 0 {
 		hi := heap.Pop(&h)
@@ -113,20 +112,20 @@ func (vp *VPTree) buildFromPoints(items []interface{}) (n *node) {
 	return
 }
 
-func (vp *VPTree) search(n *node, target interface{}, k int, h *priorityQueue) {
+func (vp *VPTree) search(n *node, tau *float64, target interface{}, k int, h *priorityQueue) {
 	if n == nil {
 		return
 	}
 
 	dist := vp.distanceMetric(n.Item, target)
 
-	if dist < vp.tau {
+	if dist < *tau {
 		if h.Len() == k {
 			heap.Pop(h)
 		}
 		heap.Push(h, &heapItem{n.Item, dist})
 		if h.Len() == k {
-			vp.tau = h.Top().(*heapItem).Dist
+			*tau = h.Top().(*heapItem).Dist
 		}
 	}
 
@@ -135,20 +134,20 @@ func (vp *VPTree) search(n *node, target interface{}, k int, h *priorityQueue) {
 	}
 
 	if dist < n.Threshold {
-		if dist-vp.tau <= n.Threshold {
-			vp.search(n.Left, target, k, h)
+		if dist-*tau <= n.Threshold {
+			vp.search(n.Left, tau, target, k, h)
 		}
 
-		if dist+vp.tau >= n.Threshold {
-			vp.search(n.Right, target, k, h)
+		if dist+*tau >= n.Threshold {
+			vp.search(n.Right, tau, target, k, h)
 		}
 	} else {
-		if dist+vp.tau >= n.Threshold {
-			vp.search(n.Right, target, k, h)
+		if dist+*tau >= n.Threshold {
+			vp.search(n.Right, tau, target, k, h)
 		}
 
-		if dist-vp.tau <= n.Threshold {
-			vp.search(n.Left, target, k, h)
+		if dist-*tau <= n.Threshold {
+			vp.search(n.Left, tau, target, k, h)
 		}
 	}
 }
