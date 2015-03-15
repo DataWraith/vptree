@@ -86,3 +86,7 @@ Now you can search the tree for the k nearest neighbours of a query point.
 	// Output: [23.769728648009426 25.942243542145693 45.221676218380054]
 }
 ```
+
+## Contributors
+
+* Damian Gryski (@gdryski) made the VP-tree search thread-safe
