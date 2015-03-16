@@ -89,4 +89,4 @@ Now you can search the tree for the k nearest neighbours of a query point.
 
 ## Contributors
 
-* Damian Gryski (@gdryski) made the VP-tree search thread-safe
+* Damian Gryski (@dgryski) made the VP-tree search thread-safe
