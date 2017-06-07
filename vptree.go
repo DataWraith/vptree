@@ -105,7 +105,7 @@ func (vp *VPTree) buildFromPoints(items []interface{}) (n *node) {
 		items[len(items)-1], items[storeIndex] = items[storeIndex], items[len(items)-1]
 		median = storeIndex
 
-		n.Threshold = vp.distanceMetric(items[median], n.Item)
+		n.Threshold = pivotDist
 		n.Left = vp.buildFromPoints(items[:median])
 		n.Right = vp.buildFromPoints(items[median:])
 	}
