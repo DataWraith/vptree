@@ -1,5 +1,3 @@
-**Status**: This project is in maintenance mode. I will address Issues and Pull requests, but I will not add new features myself.
-
 # vptree
 
 vptree is a port of Steve Hanov's C++
